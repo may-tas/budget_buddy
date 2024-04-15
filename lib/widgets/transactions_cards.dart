@@ -1,4 +1,7 @@
 import 'package:budget_buddy/utils/app_icons.dart';
+import 'package:budget_buddy/widgets/trans_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,8 +11,6 @@ class TransactionsCard extends StatelessWidget {
   TransactionsCard({
     super.key,
   });
-
-  var appIcons = AppIcons();
 
   @override
   Widget build(BuildContext context) {
@@ -27,69 +28,50 @@ class TransactionsCard extends StatelessWidget {
               )
             ],
           ),
-          ListView.builder(
-              padding: EdgeInsets.all(2),
-              shrinkWrap: true,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.all(7),
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.lightBlue[50]),
-                    child: ListTile(
-                      minVerticalPadding: 8,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 0, horizontal: 10),
-                      leading: Container(
-                        padding: const EdgeInsets.all(10),
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.green.withOpacity(0.2)),
-                        child: FaIcon(
-                          appIcons.getExpenseCategoryIcons('home'),
-                          size: 25,
-                        ),
-                      ),
-                      title: const Row(
-                        children: [
-                          Expanded(child: Text("Car Rent Jan 2024")),
-                          Text('₹ 8000', style: TextStyle(color: Colors.green))
-                        ],
-                      ),
-                      subtitle: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text("Balance",
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 13)),
-                              Spacer(),
-                              Text(
-                                "₹ 525",
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 13),
-                              )
-                            ],
-                          ),
-                          Text(
-                            "21 Jan 04:51 PM",
-                            style: TextStyle(color: Colors.grey),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              })
+          RecentTransactionList()
         ],
       ),
     );
+  }
+}
+
+class RecentTransactionList extends StatelessWidget {
+  RecentTransactionList({
+    super.key,
+  });
+  final userId = FirebaseAuth.instance.currentUser!.uid;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('transactions')
+            .orderBy('timestamp')
+            .limit(20)
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text("Loading");
+          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Text("No transactions found");
+          }
+
+          var data = snapshot.data!.docs;
+
+          return ListView.builder(
+              padding: const EdgeInsets.all(2),
+              shrinkWrap: true,
+              itemCount: data.length,
+              itemBuilder: (context, index) {
+                var cardData = data[index];
+                return TransactionCard(
+                  data: cardData,
+                );
+              });
+        });
   }
 }

@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(builder: (((context) => const LoginPage()))));
   }
 
+  final userId = FirebaseAuth.instance.currentUser!.uid;
+
   _dialogueBuilder(BuildContext context) {
     return showDialog(
         context: context,
@@ -67,8 +69,10 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            HeroCard(),
-            SizedBox(height: 20),
+            HeroCard(
+              userId: userId,
+            ),
+            const SizedBox(height: 20),
             TransactionsCard(),
           ],
         ),

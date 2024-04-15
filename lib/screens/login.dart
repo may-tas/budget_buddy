@@ -1,5 +1,6 @@
 import 'package:budget_buddy/screens/sign_up.dart';
 import 'package:budget_buddy/services/auth_service.dart';
+import 'package:budget_buddy/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -17,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   var authService = AuthService();
-
+  var appValidator = AppValidator();
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       var data = {'email': _email.text, 'password': _password.text};
@@ -64,12 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                 TextFormField(
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   controller: _email,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password can't be empty";
-                    }
-                    return null;
-                  },
+                  validator: appValidator.validateApp(),
                   decoration: InputDecoration(
                     hintText: "Email",
                     hintStyle: GoogleFonts.sourceSans3(
@@ -92,12 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                   obscureText: hidePassword,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   controller: _password,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password can't be empty";
-                    }
-                    return null;
-                  },
+                  validator: appValidator.validateApp(),
                   decoration: InputDecoration(
                     hintText: "Password",
                     hintStyle: GoogleFonts.sourceSans3(

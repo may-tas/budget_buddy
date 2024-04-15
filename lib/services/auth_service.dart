@@ -1,15 +1,17 @@
 import 'package:budget_buddy/screens/dashboard.dart';
+import 'package:budget_buddy/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AuthService {
+  var db = DataBase();
   createUserWithEmailAndPassword(data, context1) async {
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: data["email"],
         password: data["password"],
       );
-
+      await db.addUser(data, context1);
       Navigator.push(
         context1,
         MaterialPageRoute(builder: (context1) => const DashBoard()),

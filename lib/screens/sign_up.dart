@@ -28,7 +28,10 @@ class _MySignUpState extends State<MySignUp> {
       var data = {
         'email': _email.text,
         'password': _password.text,
-        "username": _userName.text
+        "username": _userName.text,
+        "remainingAmount": 0,
+        "totalCredit": 0,
+        "totalDebit": 0,
       };
       authService.createUserWithEmailAndPassword(data, context);
       setState(() {
